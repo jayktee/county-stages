@@ -1,0 +1,34 @@
+---
+title: "COVID-19 County Stages"
+author: "Joyce Tagal"
+date: "`r Sys.Date()`"
+output: 
+  github_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Libraries
+library(tidyverse)
+library(ussf)
+library(sf)
+
+# Parameters
+
+file_in <- "/Users/joycetagal/GitHub/county-stages.github.io/data/us-county-stages-20200407-012123.csv"
+
+#===============================================================================
+
+# Code
+```
+
+## Exploring the data
+
+
+
+## Mapping the data
+

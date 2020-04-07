@@ -3,7 +3,5 @@
 .Rhistory
 .RData
 .Ruserdata
-blogdown
 .DS_Store
-public/
-website.Rproj
+*.csv
