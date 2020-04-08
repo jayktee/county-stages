@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Update a choropleth layer by zoom level</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.css" rel="stylesheet" />
+  <style>
+  body { margin: 0; padding: 0; }
+  #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+</style>
+</head>
+<body>
+  <!-- <style>
+  .legend {
+  background-color: #fff;
+  border-radius: 3px;
+  bottom: 30px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  padding: 10px;
+  position: absolute;
+  right: 10px;
+  z-index: 1;
+}
+
+.legend h4 {
+margin: 0 0 10px;
+}
+
+.legend div span {
+border-radius: 50%;
+display: inline-block;
+height: 10px;
+margin-right: 5px;
+width: 10px;
+}
+</style> -->
+
+<div id="map"></div>
+
+<div id="state-legend" class="legend">
+  <h4>Population</h4>
+  <div><span style="background-color: #723122"></span>25,000,000</div>
+  <div><span style="background-color: #8B4225"></span>10,000,000</div>
+  <div><span style="background-color: #A25626"></span>7,500,000</div>
+  <div><span style="background-color: #B86B25"></span>5,000,000</div>
+  <div><span style="background-color: #CA8323"></span>2,500,000</div>
+  <div><span style="background-color: #DA9C20"></span>1,000,000</div>
+  <div><span style="background-color: #E6B71E"></span>750,000</div>
+  <div><span style="background-color: #EED322"></span>500,000</div>
+  <div><span style="background-color: #F2F12D"></span>0</div>
+</div>
+
+<div id="county-legend" class="legend" style="display: none;">
+  <h4>Population</h4>
+  <div><span style="background-color: #723122"></span>1,000,000</div>
+  <div><span style="background-color: #8B4225"></span>500,000</div>
+  <div><span style="background-color: #A25626"></span>100,000</div>
+  <div><span style="background-color: #B86B25"></span>50,000</div>
+  <div><span style="background-color: #CA8323"></span>10,000</div>
+  <div><span style="background-color: #DA9C20"></span>5,000</div>
+  <div><span style="background-color: #E6B71E"></span>1,000</div>
+  <div><span style="background-color: #EED322"></span>100</div>
+  <div><span style="background-color: #F2F12D"></span>0</div>
+</div>
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiamF5a3RlZSIsImEiOiJjazczdjY2OXIwZHV5M2xueHY5bHJpYnBjIn0.dvpi0WuRKtUWRtUI03t-rQ';
+var map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/light-v10',
+  center: [-98, 38.88],
+  minZoom: 3,
+  zoom: 3
+});
+
+var zoomThreshold = 4;
+
+var maxValue = 13;
+var data = [
+  { 'STATE_ID': '01', 'unemployment': 13.17 },
+  { 'STATE_ID': '02', 'unemployment': 9.5 },
+  { 'STATE_ID': '04', 'unemployment': 12.15 },
+  { 'STATE_ID': '05', 'unemployment': 8.99 },
+  { 'STATE_ID': '06', 'unemployment': 11.83 },
+  { 'STATE_ID': '08', 'unemployment': 7.52 },
+  { 'STATE_ID': '09', 'unemployment': 6.44 },
+  { 'STATE_ID': '10', 'unemployment': 5.17 },
+  { 'STATE_ID': '12', 'unemployment': 9.67 },
+  { 'STATE_ID': '13', 'unemployment': 10.64 },
+  { 'STATE_ID': '15', 'unemployment': 12.38 },
+  { 'STATE_ID': '16', 'unemployment': 10.13 },
+  { 'STATE_ID': '17', 'unemployment': 9.58 },
+  { 'STATE_ID': '18', 'unemployment': 10.63 },
+  { 'STATE_ID': '19', 'unemployment': 8.09 },
+  { 'STATE_ID': '20', 'unemployment': 5.93 },
+  { 'STATE_ID': '21', 'unemployment': 9.86 },
+  { 'STATE_ID': '22', 'unemployment': 9.81 },
+  { 'STATE_ID': '23', 'unemployment': 7.82 },
+  { 'STATE_ID': '24', 'unemployment': 8.35 },
+  { 'STATE_ID': '25', 'unemployment': 9.1 },
+  { 'STATE_ID': '26', 'unemployment': 10.69 },
+  { 'STATE_ID': '27', 'unemployment': 11.53 },
+  { 'STATE_ID': '28', 'unemployment': 9.29 },
+  { 'STATE_ID': '29', 'unemployment': 9.94 },
+  { 'STATE_ID': '30', 'unemployment': 9.29 },
+  { 'STATE_ID': '31', 'unemployment': 5.45 },
+  { 'STATE_ID': '32', 'unemployment': 4.21 },
+  { 'STATE_ID': '33', 'unemployment': 4.27 },
+  { 'STATE_ID': '34', 'unemployment': 4.09 },
+  { 'STATE_ID': '35', 'unemployment': 7.83 },
+  { 'STATE_ID': '36', 'unemployment': 8.01 },
+  { 'STATE_ID': '37', 'unemployment': 9.34 },
+  { 'STATE_ID': '38', 'unemployment': 11.23 },
+  { 'STATE_ID': '39', 'unemployment': 7.08 },
+  { 'STATE_ID': '40', 'unemployment': 11.22 },
+  { 'STATE_ID': '41', 'unemployment': 6.2 },
+  { 'STATE_ID': '42', 'unemployment': 9.11 },
+  { 'STATE_ID': '44', 'unemployment': 10.42 },
+  { 'STATE_ID': '45', 'unemployment': 8.89 },
+  { 'STATE_ID': '46', 'unemployment': 11.03 },
+  { 'STATE_ID': '47', 'unemployment': 7.35 },
+  { 'STATE_ID': '48', 'unemployment': 8.92 },
+  { 'STATE_ID': '49', 'unemployment': 7.65 },
+  { 'STATE_ID': '50', 'unemployment': 8.01 },
+  { 'STATE_ID': '51', 'unemployment': 7.62 },
+  { 'STATE_ID': '53', 'unemployment': 7.77 },
+  { 'STATE_ID': '54', 'unemployment': 8.49 },
+  { 'STATE_ID': '55', 'unemployment': 9.42 },
+  { 'STATE_ID': '56', 'unemployment': 7.59 }
+];
+
+map.on('load', function() {
+  // map.addSource('population', {
+  //     'type': 'vector',
+  //     'url': 'mapbox://mapbox.660ui7x6'
+  // });
+
+  // map.addSource('county-stages-data', {
+  //   type: 'json',
+  //   data: 'https://drive.google.com/open?id=1-2iJ9-RxzSeu1Hghe2cO5L_fkPo635bx',
+  //   buffer: 0,
+  //   maxzoom: 12
+  // });
+
+  // map.addLayer(
+  //   {
+  //     'id': 'county-stages',
+  //     'source': 'county-stages-data',
+  //     // 'source-layer': 'state_county_population_2014_cen',
+  //     'maxzoom': zoomThreshold,
+  //     'type': 'fill',
+  //     'filter': ['==', 'isState', true],
+  //     'paint': {
+  //       'fill-color': [
+  //         'interpolate',
+  //         ['linear'],
+  //         ['get', 'population'],
+  //         0,
+  //         '#F2F12D',
+  //         500000,
+  //         '#EED322',
+  //         750000,
+  //         '#E6B71E',
+  //         1000000,
+  //         '#DA9C20',
+  //         2500000,
+  //         '#CA8323',
+  //         5000000,
+  //         '#B86B25',
+  //         7500000,
+  //         '#A25626',
+  //         10000000,
+  //         '#8B4225',
+  //         25000000,
+  //         '#723122'
+  //       ],
+  //       'fill-opacity': 0.75
+  //     }
+  //   },
+  //   'waterway-label'
+  // );
+
+  map.addSource('states', {
+    type: 'vector',
+    url: 'mapbox://mapbox.us_census_states_2015'
+  });
+
+  // map.addLayer(
+  //     {
+  //         'id': 'state-population',
+  //         'source': 'population',
+  //         'source-layer': 'state_county_population_2014_cen',
+  //         'maxzoom': zoomThreshold,
+  //         'type': 'fill',
+  //         'filter': ['==', 'isState', true],
+  //         'paint': {
+  //             'fill-color': [
+  //                 'interpolate',
+  //                 ['linear'],
+  //                 ['get', 'population'],
+  //                 0,
+  //                 '#F2F12D',
+  //                 500000,
+  //                 '#EED322',
+  //                 750000,
+  //                 '#E6B71E',
+  //                 1000000,
+  //                 '#DA9C20',
+  //                 2500000,
+  //                 '#CA8323',
+  //                 5000000,
+  //                 '#B86B25',
+  //                 7500000,
+  //                 '#A25626',
+  //                 10000000,
+  //                 '#8B4225',
+  //                 25000000,
+  //                 '#723122'
+  //             ],
+  //             'fill-opacity': 0.75
+  //         }
+  //     },
+  //     'waterway-label'
+  // );
+
+  var expression = ['match', ['get', 'STATE_ID']];
+
+  Calculate color for each county based on given number
+  data.forEach(function(row) {
+    var green = (row['unemployment'] / maxValue) * 255;
+    var color = 'rgba(' + 0 + ', ' + green + ', ' + 0 + ', 1)';
+    expression.push(row['STATE_ID'], color);
+  });
+
+  expression.push('rgba(0,0,0,0)');
+
+  map.addLayer(
+    {
+      'id': 'states-join',
+      'type': 'fill',
+      'source': 'states',
+      'source-layer': 'states',
+      // 'filter': ['==', 'isState', true],
+      'paint': {
+        'fill-color': expression
+      },
+    },
+    'waterway-label'
+  );
+});
+
+
+//     map.addLayer(
+//         {
+//             'id': 'county-population',
+//             'source': 'population',
+//             'source-layer': 'state_county_population_2014_cen',
+//             'minzoom': zoomThreshold,
+//             'type': 'fill',
+//             'filter': ['==', 'isCounty', true]
+//         },
+//         'waterway-label'
+//     );
+// });
+
+// var stateLegendEl = document.getElementById('state-legend');
+// var countyLegendEl = document.getElementById('county-legend');
+// map.on('zoom', function() {
+//   if (map.getZoom() > zoomThreshold) {
+//     stateLegendEl.style.display = 'none';
+//     countyLegendEl.style.display = 'block';
+//   } else {
+//     stateLegendEl.style.display = 'block';
+//     countyLegendEl.style.display = 'none';
+//   }
+// });
+</script>
+
+</body>
+</html>
