@@ -1,0 +1,135 @@
+---
+title: "geojson-wrangle"
+author: "Joyce Tagal"
+date: "`r Sys.Date()`"
+output: 
+  github_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+# Libraries
+library(tidyverse)
+library(geojsonio)
+library(lubridate)
+library(sf)
+library(geojsonsf)
+
+library(rgdal)
+library(sp)
+library(spdplyr)
+library(rmapshaper)
+
+# Parameters
+
+shp_file_path <- "/Users/joycetagal/Desktop/cb_2018_us_county_500k/cb_2018_us_county_500k.shp"
+
+stages_file_in <- "/Users/joycetagal/GitHub/county-stages.github.io/data/us-county-stages-20200407-012123.csv"
+#===============================================================================
+
+
+```
+
+
+# Read Census shapefile 
+
+```{r}
+
+county <- 
+  read_sf(shp_file_path) %>% 
+  select(STATEFP, COUNTYFP, GEOID)
+
+county
+```
+
+
+
+```{r}
+
+county_stages <- 
+  read_csv(stages_file_in) %>% 
+  pivot_longer(
+    cols = -c("FIPS", "County Name", "State", "Population"),
+    names_to = "date",
+    values_to = "cases"
+  ) %>% 
+  mutate(date = parse_date(date, format = "%m/%d/%Y")) %>% 
+  filter(date > mdy("03/30/2020")) %>% 
+  mutate(
+    date = str_c(
+      as.character(day(date)), 
+      " ", 
+      as.character(month(date, label = TRUE)
+      )
+    )
+  ) 
+  
+
+county_stages
+
+```
+
+## Extract FIPS codes from county stages file
+
+```{r}
+
+fips_filter <- 
+  county_stages %>% 
+  distinct(FIPS) %>% 
+  pull()
+
+length(fips_filter)
+
+```
+
+## Filter county shape file to only have the FIPS codes in source file
+
+```{r}
+
+county_shp_filtered <- 
+  county %>% 
+  filter(GEOID %in% fips_filter) %>% 
+  mutate(FIPS = as.character(GEOID))
+
+county_shp_filtered
+
+```
+
+
+# Combining both files
+
+```{r}
+
+county_joined <- 
+  right_join(county_shp_filtered, county_stages, by = "FIPS") %>% 
+  ms_simplify() %>% 
+  ms_clip(bbox = c(-170, 15, -55, 72))
+
+```
+
+## Turning file to GeoJSON
+
+```{r}
+
+county_json <- 
+  sf_geojson(county_joined)
+
+str(county_json)
+
+```
+
+
+
+## Export to GeoJSON file
+
+```{r}
+
+county_json %>% 
+  geojson_write(file = here::here("data/county_json_clipped.geojson"))
+
+```
+

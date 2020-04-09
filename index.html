@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>COVID-19 Stages</title>
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+	<script src="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.js"></script>
+	<link href="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.css" rel="stylesheet" />
+	<style>
+	body {
+		margin: 0;
+		padding: 0;
+		font-family: 'Helvetica Neue', Helvetica, Arial, Sans-serif;
+	}
+
+	#map {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		width: 100%;
+	}
+
+	h1 {
+		font-size: 20px;
+		line-height: 30px;
+	}
+
+	h2 {
+		font-size: 14px;
+		line-height: 20px;
+		margin-bottom: 10px;
+	}
+
+	a {
+		text-decoration: none;
+		color: #2dc4b2;
+	}
+
+	#console {
+		position: absolute;
+		width: 240px;
+		margin: 10px;
+		padding: 10px 20px;
+		background-color: white;
+	}
+
+	.session {
+		margin-bottom: 20px;
+	}
+
+	.row {
+		height: 12px;
+		width: 100%;
+	}
+
+	.colors {
+		background: linear-gradient(to right, #2dc4b2, #3bb3c3, #669ec4, #8b88b6, #a2719b, #aa5e79);
+		margin-bottom: 5px;
+	}
+
+	.label {
+		width: 15%;
+		display: inline-block;
+		text-align: center;
+	}
+</style>
+</head>
+<body>
+	<div id="map"></div>
+	<div id="console">
+		<h1>COVID-19 Stages</h1>
+		<p>
+			Data:
+			<a
+			href="https://raw.githubusercontent.com/jayktee/county-stages/master/data/county_json_clipped.geojson"
+			>COVID-19 Stages by U.S. County</a>, Mar-Apr 2020
+		</p>
+		<div class="session">
+			<h2>Cases</h2>
+			<div class="row colors"></div>
+			<div class="row labels">
+				<div class="label">0</div>
+				<div class="label">1</div>
+				<div class="label">2</div>
+				<div class="label">3</div>
+				<div class="label">4</div>
+				<div class="label">5+</div>
+			</div>
+			<div class='session' id='sliderbar'>
+				<h2>Date: <label id="date"></label> </h2>
+				<select id="select">
+					<option value='31 Mar'>31 Mar</option>
+					<option value='1 Apr'>1 Apr</option>
+					<option value='2 Apr'>2 Apr</option>
+					<option value='3 Apr'>3 Apr</option>
+					<option value='4 Apr'>4 Apr</option>
+					<option value='5 Apr'>5 Apr</option>
+				</select>
+			</div>
+		</div>
+	</div>
+	<script>
+	mapboxgl.accessToken = 'pk.eyJ1IjoiamF5a3RlZSIsImEiOiJjazczdjY2OXIwZHV5M2xueHY5bHJpYnBjIn0.dvpi0WuRKtUWRtUI03t-rQ';
+	var map = new mapboxgl.Map({
+		container: 'map', // container id
+		style: 'mapbox://styles/mapbox/light-v10', // stylesheet location
+		center: [-99.9, 41.5], // starting position [lng, lat]
+		zoom: 3, // starting zoom
+		minZoom: 1,
+		maxZoom: 15
+	});
+
+	// // var dayint = _.uniq();
+	//
+	// function getJSONP(url, success) {
+	//
+	// 	var ud = '_' + +new Date,
+	// 	script = document.createElement('script'),
+	// 	head = document.getElementsByTagName('head')[0]
+	// 	|| document.documentElement;
+	//
+	// 	window[ud] = function(data) {
+	// 		head.removeChild(script);
+	// 		success && success(data);
+	// 	};
+	//
+	// 	script.src = url.replace('callback=?', 'callback=' + ud);
+	// 	head.appendChild(script);
+	//
+	// }
+	//
+	// var geoObject = getJSONP('https://raw.githubusercontent.com/jayktee/county-stages/master/data/county_json_clipped.geojson', function(data){
+	// 	console.log(data);
+	// });
+	// var features = [];
+	//
+	// features = geoObject.features;
+
+	map.on('load', function() {
+		map.addSource('county_stages', {
+			'type': 'geojson',
+			'data': 'https://raw.githubusercontent.com/jayktee/county-stages/master/data/county_json_clipped.geojson'
+		});
+
+		map.addLayer({
+			'id': 'county_stages',
+			'type': 'fill',
+			'source': 'county_stages',
+			'layout': {},
+			'paint': {
+				'fill-color': [
+					'interpolate',
+					['linear'],
+					['number', ['get', 'cases']],
+					0, '#2DC4B2',
+					1, '#3BB3C3',
+					2, '#669EC4',
+					3, '#8B88B6',
+					4, '#A2719B',
+					5, '#AA5E79'
+				],
+				'fill-opacity': 0.9
+			},
+			'filter': ['==', ['string', ['get', 'date']], '31 Mar']
+		});
+
+		document.getElementById('select').addEventListener('input', function(e) {
+			var date = e.target.value;
+			map.setFilter('county_stages', ['==', ['string', ['get', 'date']], date]);
+
+		});
+	});
+</script>
+
+</body>
+</html>
