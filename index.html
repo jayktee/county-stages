@@ -21,14 +21,20 @@
 	}
 
 	h1 {
-		font-size: 20px;
-		line-height: 30px;
+		font-size: 18px;
+		line-height: 24px;
 	}
 
 	h2 {
 		font-size: 14px;
 		line-height: 20px;
 		margin-bottom: 10px;
+	}
+
+	p {
+		font-size: 13px;
+		line-height: 18px;
+		margin-bottom: 12px;
 	}
 
 	a {
@@ -38,6 +44,8 @@
 
 	#console {
 		position: absolute;
+		bottom: 10px;
+		right: 10px;
 		width: 240px;
 		margin: 10px;
 		padding: 10px 20px;
@@ -45,33 +53,14 @@
 	}
 
 	.session {
+		font-size: 13px;
+		line-height: 18px;
 		margin-bottom: 20px;
 	}
 
 	.row {
 		height: 12px;
 		width: 100%;
-	}
-
-	.colors {
-		background: linear-gradient(to right, #2dc4b2, #3bb3c3, #669ec4, #8b88b6, #a2719b, #aa5e79);
-		margin-bottom: 5px;
-	}
-
-	.legend {
-		background-color: #fff;
-		border-radius: 3px;
-		bottom: 30px;
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-		font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-		padding: 10px;
-		position: absolute;
-		right: 10px;
-		z-index: 1;
-	}
-
-	.legend h4 {
-		margin: 0 0 10px;
 	}
 
 	.session div span {
@@ -88,13 +77,12 @@
 	<div id="console">
 		<h1>COVID-19 Stages</h1>
 		<p>
-			Data:
-			<a
+			<b>Data: </b><a
 			href="https://raw.githubusercontent.com/jayktee/county-stages/master/data/county_json_clipped.geojson"
 			>COVID-19 Stages by U.S. County</a>, Mar-Apr 2020
 		</p>
 		<div class="session">
-			<h2>Stages</h2>
+			<h2>Stages:</h2>
 			<div><span style="background-color: #26FF00"></span>Contained</div>
 			<div><span style="background-color: #3E90FF"></span>Contraction</div>
 			<div><span style="background-color: #ED82ED"></span>Slowdown</div>
@@ -102,7 +90,7 @@
 			<div><span style="background-color: #F9A302"></span>Emergence</div>
 			<div><span style="background-color: #F1F1F0"></span>None</div>
 
-		<div class='session' id='sliderbar'>
+		<div class='session'>
 			<h2>Date: <label id="date"></label> </h2>
 			<select id="select">
 				<option value='31 Mar'>31 Mar</option>
@@ -120,8 +108,8 @@
 	var map = new mapboxgl.Map({
 		container: 'map', // container id
 		style: 'mapbox://styles/mapbox/light-v10', // stylesheet location
-		center: [-99.9, 41.5], // starting position [lng, lat]
-		zoom: 3, // starting zoom
+		center: [-90.9, 35.5], // starting position [lng, lat]
+		zoom: 3.5, // starting zoom
 		minZoom: 1,
 		maxZoom: 15
 	});
@@ -153,8 +141,8 @@
 				'fill-opacity': 0.9
 			},
 			'filter': ['==', ['string', ['get', 'date']], '31 Mar']
-		}
-		// 'waterway-label'
+		},
+		'waterway-label'
 	);
 
 		document.getElementById('select').addEventListener('input', function(e) {
