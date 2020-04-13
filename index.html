@@ -84,7 +84,7 @@
 				<div class="label">2</div>
 				<div class="label">3</div>
 				<div class="label">4</div>
-				<div class="label">5+</div>
+				<div class="label">5</div>
 			</div>
 			<div class='session' id='sliderbar'>
 				<h2>Date: <label id="date"></label> </h2>
@@ -152,17 +152,19 @@
 					'interpolate',
 					['linear'],
 					['number', ['get', 'cases']],
-					0, '#2DC4B2',
-					1, '#3BB3C3',
-					2, '#669EC4',
-					3, '#8B88B6',
-					4, '#A2719B',
-					5, '#AA5E79'
+					0, '#FEFFDF',
+					1, '#F9A302',
+					2, '#F84401',
+					3, '#ED82ED',
+					4, '#3E90FF',
+					5, '#26FF00'
 				],
 				'fill-opacity': 0.9
 			},
 			'filter': ['==', ['string', ['get', 'date']], '31 Mar']
-		});
+		}
+		// 'waterway-label'
+	);
 
 		document.getElementById('select').addEventListener('input', function(e) {
 			var date = e.target.value;
