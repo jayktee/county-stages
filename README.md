@@ -6,7 +6,6 @@ Updated 04-09-2020
 
 Currently:
 * Data only spans 31-Mar-2020 to 5-Apr-2020 as a test.
-* Color is based on number of new cases per day, not stages.
 
 To-dos:
 * Figure out how to run very large GeoJSON (possibly Sherlock)
